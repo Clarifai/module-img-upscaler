@@ -22,9 +22,11 @@ st.title("Image Upscaler")
 st.subheader("Choose an image to get started")
 
 @st.cache_data
-def get_upscaled_img(img_file, upscale_percent):
+def get_upscaled_img(img_file, upscale_width):
     image_b = img_file.getvalue()
-    response = Model(model_url).predict_by_bytes(image_b, "image")
+    inference_params = dict(width=upscale_width)
+    # response = Model(model_url).predict_by_bytes(image_b, "image")
+    response = Model(model_url).predict_by_bytes(image_b, "image", inference_params=inference_params)
     img = response.outputs[0].data.image.base64
     img_info = json_format.MessageToDict(response.outputs[0].data.image.image_info)
     return img, img_info
@@ -38,13 +40,12 @@ def upload_image(img_bytes):
 
 with st.form(key="upscaler_form"):
     img_file = st.file_uploader("Select an image", type=["png", "jpg", "jpeg"])
-    upscale_percent = None
-    # upscale_percent = st.slider("Upscaling percentage:", min_value=110, max_value=500, value=110, step=10, format="%d")
+    upscale_width = st.number_input("Upscaling width: (Min:512 | Max:2048)", min_value=512, max_value=2048, value=1024, step=2, format="%d")
     submit_button = st.form_submit_button(label="Upscale & Upload")
 
 if submit_button and img_file:
     with st.spinner('Wait for it...'):
-        img, img_info = get_upscaled_img(img_file, upscale_percent)
+        img, img_info = get_upscaled_img(img_file, upscale_width)
     st.write(f"Image Upscaled to {img_info['width']}x{img_info['height']} (ht x wt)")
     st.image(img, caption="Upscaled Image", use_column_width=True)
     upload_image(img)
