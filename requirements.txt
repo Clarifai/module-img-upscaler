@@ -1,2 +1,4 @@
-clarifai==9.8.1
+clarifai==9.10.0
 streamlit==1.24.0
+bytesbufio==1.0.3
+Pillow==9.5.0
